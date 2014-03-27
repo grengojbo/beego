@@ -22,11 +22,11 @@ import (
 	"crypto/sha1"
 	"crypto/sha256"
 	"encoding/hex"
-	// "fmt"
+	"fmt"
 	"hash"
 	// "math/big"
 	"net/url"
-	// "reflect"
+	"reflect"
 	"strconv"
 	// "time"
 	"github.com/astaxie/beego"
@@ -133,6 +133,94 @@ func (f StrTo) String() string {
 	return ""
 }
 
+// convert any type to string
+func ToStr(value interface{}, args ...int) (s string) {
+	switch v := value.(type) {
+	case bool:
+		s = strconv.FormatBool(v)
+	case float32:
+		s = strconv.FormatFloat(float64(v), 'f', argInt(args).Get(0, -1), argInt(args).Get(1, 32))
+	case float64:
+		s = strconv.FormatFloat(v, 'f', argInt(args).Get(0, -1), argInt(args).Get(1, 64))
+	case int:
+		s = strconv.FormatInt(int64(v), argInt(args).Get(0, 10))
+	case int8:
+		s = strconv.FormatInt(int64(v), argInt(args).Get(0, 10))
+	case int16:
+		s = strconv.FormatInt(int64(v), argInt(args).Get(0, 10))
+	case int32:
+		s = strconv.FormatInt(int64(v), argInt(args).Get(0, 10))
+	case int64:
+		s = strconv.FormatInt(v, argInt(args).Get(0, 10))
+	case uint:
+		s = strconv.FormatUint(uint64(v), argInt(args).Get(0, 10))
+	case uint8:
+		s = strconv.FormatUint(uint64(v), argInt(args).Get(0, 10))
+	case uint16:
+		s = strconv.FormatUint(uint64(v), argInt(args).Get(0, 10))
+	case uint32:
+		s = strconv.FormatUint(uint64(v), argInt(args).Get(0, 10))
+	case uint64:
+		s = strconv.FormatUint(v, argInt(args).Get(0, 10))
+	case string:
+		s = v
+	case []byte:
+		s = string(v)
+	default:
+		s = fmt.Sprintf("%v", v)
+	}
+	return s
+}
+
+// convert any numeric value to int64
+func ToInt64(value interface{}) (d int64, err error) {
+	val := reflect.ValueOf(value)
+	switch value.(type) {
+	case int, int8, int16, int32, int64:
+		d = val.Int()
+	case uint, uint8, uint16, uint32, uint64:
+		d = int64(val.Uint())
+	default:
+		err = fmt.Errorf("ToInt64 need numeric not `%T`", value)
+	}
+	return
+}
+
+type argString []string
+
+func (a argString) Get(i int, args ...string) (r string) {
+	if i >= 0 && i < len(a) {
+		r = a[i]
+	} else if len(args) > 0 {
+		r = args[0]
+	}
+	return
+}
+
+type argInt []int
+
+func (a argInt) Get(i int, args ...int) (r int) {
+	if i >= 0 && i < len(a) {
+		r = a[i]
+	}
+	if len(args) > 0 {
+		r = args[0]
+	}
+	return
+}
+
+type argAny []interface{}
+
+func (a argAny) Get(i int, args ...interface{}) (r interface{}) {
+	if i >= 0 && i < len(a) {
+		r = a[i]
+	}
+	if len(args) > 0 {
+		r = args[0]
+	}
+	return
+}
+
 // Random generate string
 func GetRandomString(n int) string {
 	const alphanum = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
@@ -224,4 +312,19 @@ func IsMatchHost(uri string) bool {
 	}
 
 	return true
+}
+
+func StringsToJson(str string) string {
+	rs := []rune(str)
+	jsons := ""
+	for _, r := range rs {
+		rint := int(r)
+		if rint < 128 {
+			jsons += string(r)
+		} else {
+			jsons += "\\u" + strconv.FormatInt(int64(rint), 16) // json
+		}
+	}
+
+	return jsons
 }
