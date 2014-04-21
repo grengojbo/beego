@@ -28,6 +28,7 @@ import (
 	"net/url"
 	"reflect"
 	"strconv"
+	"strings"
 	// "time"
 	"github.com/astaxie/beego"
 	// "github.com/astaxie/beego/cache"
@@ -327,4 +328,15 @@ func StringsToJson(str string) string {
 	}
 
 	return jsons
+}
+
+// StrFilling("c", "0", "11", 9) filling string to a certain length
+// return c000000011
+func StrFilling(pref string, filling string, suff string, lim int) string {
+	lpn := len(suff)
+	if lpn < lim {
+		return pref + strings.Repeat(filling, lim-lpn) + suff
+	} else {
+		return pref + suff
+	}
 }
