@@ -340,3 +340,8 @@ func StrFilling(pref string, filling string, suff string, lim int) string {
 		return pref + suff
 	}
 }
+
+// return a user salt token
+func GetSalt() string {
+	return GetRandomString(10)
+}
