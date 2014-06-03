@@ -21,6 +21,7 @@ import (
 	"crypto/rand"
 	"crypto/sha1"
 	"crypto/sha256"
+	"encoding/base64"
 	"encoding/hex"
 	"fmt"
 	"hash"
@@ -355,4 +356,29 @@ func StrFilling(pref string, filling string, suff string, lim int) string {
 // return a user salt token
 func GetSalt() string {
 	return GetRandomString(10)
+}
+
+func GenerateRandomBytes(s int) ([]byte, error) {
+	b := make([]byte, s)
+	n, err := rand.Read(b)
+	if n != len(b) || err != nil {
+		return nil, fmt.Errorf("Unable to successfully read from the system CSPRNG.")
+	}
+
+	return b, nil
+}
+
+// This will give us a 44 byte, base64 encoded output
+//    token, err := GenerateRandomString(32)
+// 		if err != nil {
+// 			Serve an appropriately vague error to the user, but log the details internally.
+// 			(for web applications/services, a HTTP 500 is suitable here)
+// 		}
+func GenerateRandomString(s int) (string, error) {
+	b, err := GenerateRandomBytes(s)
+	if err != nil {
+		return "", err
+	}
+
+	return base64.URLEncoding.EncodeToString(b), nil
 }
