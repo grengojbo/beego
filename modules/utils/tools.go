@@ -25,6 +25,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"hash"
+	"os"
 	// "math/big"
 	"net/url"
 	"reflect"
@@ -381,4 +382,49 @@ func GenerateRandomString(s int) (string, error) {
 	}
 
 	return base64.URLEncoding.EncodeToString(b), nil
+}
+
+func IsExits(filename string) error {
+	if _, err := os.Stat(filename); os.IsNotExist(err) {
+		return err
+	} else {
+		return nil
+	}
+}
+
+// "65" sec return 65, "00:01:05"
+func DurationToTime(dur string) (i int, t string) {
+	res := strings.Split(dur, ".")
+	if d, err := StrTo(res[0]).Int(); err == nil {
+		i = d
+		dhour := "0"
+		dmin := "0"
+		dsec := "0"
+
+		tsec := 0
+		thour := 0
+		tmin := d / 60
+		if tmin == 0 {
+			tsec = d
+		} else if tmin > 59 {
+			thour = tmin / 60
+			tmin = tmin - (thour * 60)
+			tsec = d - (thour * 60 * 60) - (tmin * 60)
+		} else {
+			tsec = d - (tmin * 60)
+		}
+		if thour > 9 {
+			dhour = ""
+		}
+		if tmin > 9 {
+			dmin = ""
+		}
+		if tsec > 9 {
+			dsec = ""
+		}
+		t = fmt.Sprintf("%s%d:%s%d:%s%d", dhour, thour, dmin, tmin, dsec, tsec)
+	} else {
+		t = err.Error()
+	}
+	return i, t
 }
