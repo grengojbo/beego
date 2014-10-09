@@ -29,6 +29,7 @@ import (
 	// "math/big"
 	"net/url"
 	"reflect"
+	"regexp"
 	"strconv"
 	"strings"
 	// "time"
@@ -44,6 +45,26 @@ import (
 // }
 
 // convert string to specify type
+
+func ValidPhone(phone string, pref string) (b bool, res string) {
+	p := regexp.MustCompile("^(\\+380|380|0)?(\\d{9})$")
+	r := p.FindStringSubmatch(phone)
+	if len(r) > 0 {
+		return true, fmt.Sprintf("%s%s", pref, r[2])
+	} else {
+		return false, phone
+	}
+}
+
+func ValidCard(card string, pref string) (b bool, res string) {
+	p := regexp.MustCompile("^(\\d{10})$")
+	r := p.FindStringSubmatch(card)
+	if len(r) > 0 {
+		return true, fmt.Sprintf("%s%s", pref, r[1])
+	} else {
+		return false, card
+	}
+}
 
 type StrTo string
 
